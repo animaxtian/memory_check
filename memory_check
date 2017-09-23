@@ -1,0 +1,61 @@
+total=$( free | grep Mem: | awk '{ print $2 }' )
+used=$( free | grep Mem: | awk '{ print $3 }' )
+
+used=$(($used*100))
+percent=$(($used/$total))
+
+while getopts ":w:c:e:" opt; do
+      case $opt in
+        w ) warn="$OPTARG";;
+        c ) crit="$OPTARG";;
+        e ) email="$OPTARG";;
+        \?) echo "Invalid option: -"$OPTARG"" >&2
+            exit 1;;
+        : ) echo "Option -"$OPTARG" requires an argument." >&2
+            exit 1;;
+      esac
+done
+
+if [ -z $warn ]
+then
+      echo "-w (warning value) required"
+      ex=1
+fi
+
+if [ -z $crit ]
+then
+      echo "-c (critical value) required"
+      ex=1
+fi
+
+if [ -z $email ]
+then
+      echo "-e (email value) required"
+      ex=1
+fi
+
+if [ $ex -e 1 ]
+then
+      exit 1
+fi
+
+if [ $warn -ge $crit ]
+then
+      echo "Invalid Input, Critical must be bigger than Warning" >&2
+            exit 1
+fi
+
+if [ $percent -ge $crit ]
+then
+      echo "2"
+            exit 1
+elif [ $percent -ge $warn ]
+then
+      echo "1"
+            exit 1
+else
+      echo "0"
+            exit 1
+fi
+
+
